@@ -1,0 +1,52 @@
+{
+  "name": "safegate",
+  "version": "0.2.0",
+  "description": "Catches auth bugs and unsafe Postgres migrations in Next.js/Express + Prisma apps, then gets a fix from Gemini and proves it by re-scanning.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "safegate": "dist/src/cli.js"
+  },
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist/src",
+    "web",
+    "examples/demo-app",
+    "action.yml",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:prod": "tsc -p tsconfig.build.json",
+    "pretest": "npm run build",
+    "test": "node --test \"dist/test/*.test.js\"",
+    "predemo": "npm run build",
+    "demo": "node dist/src/cli.js check --root examples/demo-app --fail-on none",
+    "preserve": "npm run build",
+    "serve": "node dist/src/cli.js serve",
+    "start": "node dist/src/cli.js serve"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/node": ">=22"
+  },
+  "keywords": [
+    "security",
+    "prisma",
+    "nextjs",
+    "idor",
+    "postgres",
+    "migrations",
+    "static-analysis",
+    "ai-generated-code",
+    "gemini",
+    "vertex-ai",
+    "cloud-run"
+  ]
+}

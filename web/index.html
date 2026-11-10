@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>safegate: verified fixes for AI-written code</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="brand">safegate</p>
+      <h1>AI writes the bug. Gemini writes the fix. The scanner proves it.</h1>
+      <p class="lede">Paste a public Next.js or Express + Prisma repository. safegate finds broken access checks and migrations that lock or wipe production tables, then asks Gemini for a patch and re-scans it before showing it to you.</p>
+    </header>
+
+    <form id="scan-form" autocomplete="off">
+      <label for="repo">Public GitHub repository</label>
+      <div class="row">
+        <input id="repo" name="repo" type="text" placeholder="https://github.com/owner/repo" spellcheck="false">
+        <button type="submit" id="scan-btn" class="primary">Scan</button>
+        <button type="button" id="demo-btn">Try the demo app</button>
+      </div>
+      <p id="form-error" class="error" role="alert" hidden></p>
+    </form>
+
+    <p id="status" class="status" role="status" hidden></p>
+
+    <section id="results" hidden>
+      <div class="summary">
+        <h2 id="summary-title"></h2>
+        <p id="summary-sub"></p>
+      </div>
+      <div id="filters" class="filters"></div>
+      <ol id="findings"></ol>
+    </section>
+
+    <footer>
+      <p id="stats"></p>
+      <p>Repositories are downloaded to a temporary folder, never executed, and deleted within 20 minutes. Only usage counters are stored. When you ask for a fix, the one affected file and your Prisma schema are sent to Gemini.</p>
+      <p id="version"></p>
+    </footer>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

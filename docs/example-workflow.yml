@@ -1,0 +1,59 @@
+# Copy to .github/workflows/safegate.yml in the app you want to protect.
+# Optional: add a repository secret GEMINI_API_KEY (free key from https://aistudio.google.com/apikey)
+# to get verified fix suggestions posted on each pull request.
+name: safegate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write # lets the fixes job comment on the PR
+
+jobs:
+  # 1. The gate: inline annotations, fails the check on high-severity findings in changed files.
+  safegate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed so --base can diff against the target branch
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: your-github-user/safegate@v0.2.0 # replace with your fork/tag
+        with:
+          root: .
+          base: origin/${{ github.base_ref }}
+          fail-on: high
+
+  # 2. The fixes: Gemini proposes a patch per finding; safegate re-scans each patch and only
+  #    posts the ones that pass. Runs even when the gate fails. Skipped on PRs from forks,
+  #    which cannot read secrets.
+  safegate-fixes:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build safegate
+        run: |
+          git clone --depth 1 --branch v0.2.0 https://github.com/your-github-user/safegate /tmp/safegate
+          cd /tmp/safegate && npm install --no-audit --no-fund && npm run build:prod
+      - name: Ask Gemini for verified fixes
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          BASE_REF: origin/${{ github.base_ref }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then echo "GEMINI_API_KEY secret not set, skipping fixes"; exit 0; fi
+          node /tmp/safegate/dist/src/cli.js fix --base "$BASE_REF" --max 8 --format markdown --output fixes.md
+      - name: Comment on the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          if [ -s fixes.md ]; then gh pr comment "$PR" --body-file fixes.md; fi
