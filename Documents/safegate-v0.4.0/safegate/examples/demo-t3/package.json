@@ -1,0 +1,15 @@
+{
+  "name": "safegate-demo-t3",
+  "private": true,
+  "description": "A tiny T3-style app (Next.js + tRPC + Drizzle + Hono) with planted security and migration bugs, used to validate safegate.",
+  "dependencies": {
+    "@trpc/server": "^11.0.0",
+    "drizzle-orm": "^0.44.0",
+    "hono": "^4.6.0",
+    "postgres": "^3.4.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.0"
+  }
+}

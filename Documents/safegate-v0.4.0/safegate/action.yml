@@ -1,0 +1,38 @@
+name: "safegate"
+description: "Block pull requests that add auth bugs (IDOR, missing auth, mass assignment) or unsafe Postgres migrations in Prisma apps."
+branding:
+  icon: "shield"
+  color: "red"
+inputs:
+  root:
+    description: "Project root to scan (the folder that contains prisma/)"
+    required: false
+    default: "."
+  base:
+    description: "Git ref to diff against. Only findings in changed files are reported. Leave empty to scan everything."
+    required: false
+    default: ""
+  fail-on:
+    description: "Lowest severity that fails the check: high | medium | low | none"
+    required: false
+    default: "high"
+runs:
+  using: "composite"
+  steps:
+    - name: Install and build safegate
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: |
+        npm install --no-audit --no-fund --loglevel=error
+        npm run build --silent
+    - name: Run safegate
+      shell: bash
+      env:
+        SG_CLI: ${{ github.action_path }}/dist/src/cli.js
+        SG_ROOT: ${{ inputs.root }}
+        SG_BASE: ${{ inputs.base }}
+        SG_FAIL_ON: ${{ inputs.fail-on }}
+      run: |
+        args=(check --root "$SG_ROOT" --format github --fail-on "$SG_FAIL_ON")
+        if [ -n "$SG_BASE" ]; then args+=(--base "$SG_BASE"); fi
+        node "$SG_CLI" "${args[@]}"
